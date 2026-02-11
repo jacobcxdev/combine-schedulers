@@ -28,7 +28,7 @@ let package = Package(
         .product(name: "ConcurrencyExtras", package: "swift-concurrency-extras"),
         .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
         .product(
-          name: "OpenCombineShim", package: "OpenCombine", condition: .when(platforms: [.linux])
+          name: "OpenCombineShim", package: "OpenCombine", condition: .when(platforms: [.linux, .android])
         ),
       ]
     ),
