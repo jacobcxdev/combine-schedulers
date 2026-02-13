@@ -1,4 +1,4 @@
-#if canImport(Combine) && canImport(SwiftUI)
+#if canImport(Combine) && canImport(SwiftUI) && !os(Android)
   import Combine
   import SwiftUI
 
