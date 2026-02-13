@@ -17,10 +17,11 @@ let package = Package(
     )
   ],
   traits: [
+    .default(enabledTraits: ["OpenCombineSchedulers"]),
     Trait(
       name: "OpenCombineSchedulers",
       description: "Support for Combine on non-Apple platforms using OpenCombine."
-    )
+    ),
   ],
   dependencies: [
     .package(url: "https://github.com/pointfreeco/swift-concurrency-extras", from: "1.3.0"),
@@ -49,9 +50,3 @@ let package = Package(
   ],
   swiftLanguageModes: [.v6]
 )
-
-#if !canImport(Darwin)
-  package.traits.insert(
-    .default(enabledTraits: ["OpenCombineSchedulers"])
-  )
-#endif
