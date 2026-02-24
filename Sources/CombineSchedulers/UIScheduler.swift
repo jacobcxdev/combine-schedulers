@@ -9,6 +9,9 @@
   #else
     import Dispatch
   #endif
+  #if os(Android)
+    import Foundation  // Thread.isMainThread
+  #endif
 
   /// A scheduler that executes its work on the main queue as soon as possible.
   ///
@@ -37,11 +40,15 @@
 
     public func schedule(options: SchedulerOptions? = nil, _ action: @escaping () -> Void) {
       #if os(Android)
-      // On Android, Swift Concurrency's main serial executor is not the GCD main
-      // dispatch queue — DispatchQueue.getSpecific never matches and
-      // DispatchQueue.main.schedule queues to a queue with no run loop.
-      // Execute immediately since there is no UIKit/AppKit main thread contract.
-      action()
+      // On Android, DispatchQueue.getSpecific/setSpecific don't match the main
+      // queue identity, but DispatchQueue.main IS drained via AndroidLooperExecutor
+      // (swift-android-native hooks GCD's dispatch port into Android's ALooper).
+      // Use Thread.isMainThread for main-thread detection instead.
+      if Thread.isMainThread {
+        action()
+      } else {
+        DispatchQueue.main.schedule(action)
+      }
       #else
       if DispatchQueue.getSpecific(key: key) == value {
         action()
@@ -72,11 +79,11 @@
       )
     }
 
-    #if !os(Android)
     private init() {
+      #if !os(Android)
       DispatchQueue.main.setSpecific(key: key, value: value)
+      #endif
     }
-    #endif
   }
 
   #if !os(Android)
