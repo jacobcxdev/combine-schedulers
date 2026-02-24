@@ -4,9 +4,6 @@
   import OpenCombineShim
 #endif
 #if canImport(Combine) || canImport(OpenCombineShim)
-  #if os(Android)
-  import Foundation
-  #endif
   #if swift(>=6)
     @preconcurrency import Dispatch
   #else
@@ -40,11 +37,11 @@
 
     public func schedule(options: SchedulerOptions? = nil, _ action: @escaping () -> Void) {
       #if os(Android)
-      if Thread.isMainThread {
-        action()
-      } else {
-        DispatchQueue.main.schedule(action)
-      }
+      // On Android, Swift Concurrency's main serial executor is not the GCD main
+      // dispatch queue — DispatchQueue.getSpecific never matches and
+      // DispatchQueue.main.schedule queues to a queue with no run loop.
+      // Execute immediately since there is no UIKit/AppKit main thread contract.
+      action()
       #else
       if DispatchQueue.getSpecific(key: key) == value {
         action()
@@ -75,11 +72,11 @@
       )
     }
 
+    #if !os(Android)
     private init() {
-      #if !os(Android)
       DispatchQueue.main.setSpecific(key: key, value: value)
-      #endif
     }
+    #endif
   }
 
   #if !os(Android)
