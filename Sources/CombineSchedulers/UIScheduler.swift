@@ -4,6 +4,9 @@
   import OpenCombineShim
 #endif
 #if canImport(Combine) || canImport(OpenCombineShim)
+  #if os(Android)
+  import Foundation
+  #endif
   #if swift(>=6)
     @preconcurrency import Dispatch
   #else
@@ -36,11 +39,19 @@
     public var minimumTolerance: SchedulerTimeType.Stride { DispatchQueue.main.minimumTolerance }
 
     public func schedule(options: SchedulerOptions? = nil, _ action: @escaping () -> Void) {
+      #if os(Android)
+      if Thread.isMainThread {
+        action()
+      } else {
+        DispatchQueue.main.schedule(action)
+      }
+      #else
       if DispatchQueue.getSpecific(key: key) == value {
         action()
       } else {
         DispatchQueue.main.schedule(action)
       }
+      #endif
     }
 
     public func schedule(
@@ -65,10 +76,14 @@
     }
 
     private init() {
+      #if !os(Android)
       DispatchQueue.main.setSpecific(key: key, value: value)
+      #endif
     }
   }
 
+  #if !os(Android)
   private let key = DispatchSpecificKey<UInt8>()
   private let value: UInt8 = 0
+  #endif
 #endif
