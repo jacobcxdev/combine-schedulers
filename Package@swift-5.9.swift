@@ -17,7 +17,7 @@ let package = Package(
     )
   ],
   dependencies: [
-    .package(url: "https://github.com/pointfreeco/swift-concurrency-extras", from: "1.0.0"),
+    .package(path: "../swift-concurrency-extras"),
     .package(path: "../xctest-dynamic-overlay"),
     .package(url: "https://github.com/OpenCombine/OpenCombine.git", from: "0.14.0"),
   ],
